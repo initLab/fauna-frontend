@@ -13,7 +13,8 @@ import RequireRole from '../widgets/RequireRole.jsx';
 
 const NavBar = () => {
     const {t} = useTranslation();
-    const backendUrl = import.meta.env.OIDC_AUTHORITY_URL;
+    // TODO
+    const oidcAuthorityUrl = import.meta.env.OIDC_AUTHORITY_URL;
     const {
         hasAccessToken,
         user,
@@ -96,7 +97,7 @@ const NavBar = () => {
                         </Nav.Link>
                     </RequireRole>
                     <RequireRole roles={['board_member']}>
-                        <Nav.Link href={backendUrl + 'fauna/users'}>
+                        <Nav.Link href={oidcAuthorityUrl}>
                             <i className="fa-solid fa-users" />{' '}
                             {t('views.navigation.labbers')}
                         </Nav.Link>
@@ -105,17 +106,17 @@ const NavBar = () => {
                             <i className="fa-solid fa-user" />{' '}
                             {t('views.navigation.account')}
                         </>} className="ms-0 ms-lg-auto">
-                        <NavDropdown.Item href={backendUrl + 'users/edit'}>
+                        <NavDropdown.Item href={oidcAuthorityUrl}>
                             {t('views.navigation.view_edit')}
                         </NavDropdown.Item>
                         {isInitLab && <>
-                            <NavDropdown.Item href={backendUrl + 'user/network_devices'}>
+                            <NavDropdown.Item href={oidcAuthorityUrl}>
                                 {t('views.navigation.network_devices')}
                             </NavDropdown.Item>
-                            <NavDropdown.Item href={backendUrl + 'oauth/applications'}>
+                            <NavDropdown.Item href={oidcAuthorityUrl}>
                                 {t('views.navigation.oauth_application_management')}
                             </NavDropdown.Item>
-                            <NavDropdown.Item href={backendUrl + 'oauth/authorized_applications'}>
+                            <NavDropdown.Item href={oidcAuthorityUrl}>
                                 {t('views.navigation.oauth_token_management')}
                             </NavDropdown.Item>
                             <NavDropdown.Divider />

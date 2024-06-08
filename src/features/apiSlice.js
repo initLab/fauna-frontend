@@ -4,7 +4,7 @@ import { refreshTokenIfNeeded } from '../oauth.js';
 
 const apiBaseUrl = import.meta.env.OIDC_AUTHORITY_URL + 'api/';
 const deviceApiBaseUrl = import.meta.env.PORTIER_URL + 'api/';
-const mqttApiBaseUrl = import.meta.env.MQTT_PROXY_URL;
+const mqttProxyBaseUrl = import.meta.env.MQTT_PROXY_URL;
 
 const anonymousBaseQuery = fetchBaseQuery({
     baseUrl: apiBaseUrl,
@@ -16,7 +16,7 @@ const anonymousBaseQuery = fetchBaseQuery({
 });
 
 const anonymousMqttBaseQuery = fetchBaseQuery({
-    baseUrl: mqttApiBaseUrl,
+    baseUrl: mqttProxyBaseUrl,
 });
 
 const authenticatedBaseQuery = fetchBaseQuery({
@@ -121,10 +121,6 @@ export const authenticatedDeviceApiSlice = createApi({
         }),
     }),
 });
-
-export const {
-    useGetPresentUsersQuery,
-} = anonymousApiSlice;
 
 export const {
     useGetStatusQuery,

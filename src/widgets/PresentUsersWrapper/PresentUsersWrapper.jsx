@@ -1,30 +1,38 @@
 import { Col, Row } from 'react-bootstrap';
 import PresentUsers from '../PresentUsers/PresentUsers';
 import { useTranslation } from 'react-i18next';
-import { useGetPresentUsersQuery } from '../../features/apiSlice.js';
+// import { useGetPresentUsersQuery } from '../../features/apiSlice.js';
 import LoadingIcon from '../icons/LoadingIcon.jsx';
 import { useMemo } from 'react';
 import { format, formatISO } from 'date-fns';
 import ErrorMessage from '../ErrorMessage.jsx';
-import { useNetworkState } from '@uidotdev/usehooks';
+// import { useNetworkState } from '@uidotdev/usehooks';
 
 const PresentUsersWrapper = () => {
     const { t } = useTranslation();
 
-    const {
-        online,
-    } = useNetworkState();
+    // const {
+    //     online,
+    // } = useNetworkState();
 
-    const {
-        data: users,
-        error,
-        isLoading,
-        isSuccess,
-        isError,
-        fulfilledTimeStamp,
-    } = useGetPresentUsersQuery(undefined, {
-        pollingInterval: online === false ? 0 : 60_000,
-    });
+    // TODO
+    // const {
+    //     data: users,
+    //     error,
+    //     isLoading,
+    //     isSuccess,
+    //     isError,
+    //     fulfilledTimeStamp,
+    // } = useGetPresentUsersQuery(undefined, {
+    //     pollingInterval: online === false ? 0 : 60_000,
+    // });
+    // noinspection JSMismatchedCollectionQueryUpdate
+    const users = [];
+    const error = null;
+    const isLoading = false;
+    const isSuccess = true;
+    const isError = false;
+    const fulfilledTimeStamp = useMemo(() => new Date(), []);
 
     const fulfilledTime = useMemo(() => new Date(fulfilledTimeStamp), [fulfilledTimeStamp]);
     const usersCount = isSuccess ? users.length : 0;
