@@ -1,13 +1,40 @@
+import { oidc as oidcConfig } from '../config.js';
+import { User } from 'oidc-client-ts';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { getAccessToken, isAccessTokenExpired } from '../hooks/useAuthStorage.js';
-import { refreshTokenIfNeeded } from '../oauth.js';
 
-const apiBaseUrl = import.meta.env.OIDC_AUTHORITY_URL + 'api/';
-const deviceApiBaseUrl = import.meta.env.PORTIER_URL + 'api/';
+function getAccessToken() {
+    const oidcStorage = localStorage.getItem(`oidc.user:${oidcConfig.authority}:${oidcConfig.client_id}`)
+
+    if (!oidcStorage) {
+        return null;
+    }
+
+    const user = User.fromStorageString(oidcStorage);
+
+    return user?.access_token;
+}
+
+const portierBaseUrl = import.meta.env.PORTIER_URL + 'api/';
+const presenceBaseUrl = import.meta.env.OIDC_AUTHORITY_URL + 'api/';
 const mqttProxyBaseUrl = import.meta.env.MQTT_PROXY_URL;
 
-const anonymousBaseQuery = fetchBaseQuery({
-    baseUrl: apiBaseUrl,
+const authenticatedPortierBaseQuery = fetchBaseQuery({
+    baseUrl: portierBaseUrl,
+    prepareHeaders: headers => {
+        headers.set('accept', 'application/json');
+
+        const token = getAccessToken();
+
+        if (token) {
+            headers.set('authorization', 'Bearer ' + token);
+        }
+
+        return headers;
+    },
+});
+
+const anonymousPresenceBaseQuery = fetchBaseQuery({
+    baseUrl: presenceBaseUrl,
     prepareHeaders: headers => {
         headers.set('accept', 'application/json');
 
@@ -15,99 +42,18 @@ const anonymousBaseQuery = fetchBaseQuery({
     },
 });
 
-const anonymousMqttBaseQuery = fetchBaseQuery({
+const anonymousMqttProxyBaseQuery = fetchBaseQuery({
     baseUrl: mqttProxyBaseUrl,
 });
 
-const authenticatedBaseQuery = fetchBaseQuery({
-    baseUrl: apiBaseUrl,
-    prepareHeaders: headers => {
-        headers.set('accept', 'application/json');
-
-        const token = getAccessToken();
-
-        if (token) {
-            headers.set('authorization', 'Bearer ' + token);
-        }
-
-        return headers;
-    },
-});
-
-const authenticatedDeviceBaseQuery = fetchBaseQuery({
-    baseUrl: deviceApiBaseUrl,
-    prepareHeaders: headers => {
-        headers.set('accept', 'application/json');
-
-        const token = getAccessToken();
-
-        if (token) {
-            headers.set('authorization', 'Bearer ' + token);
-        }
-
-        return headers;
-    },
-});
-
-const authenticatedBaseQueryWithReauth = async (args, api, extraOptions) => {
-    if (isAccessTokenExpired()) {
-        await refreshTokenIfNeeded();
-    }
-
-    let result = await authenticatedBaseQuery(args, api, extraOptions);
-
-    if (result?.error?.status === 401 && await refreshTokenIfNeeded()) {
-        return authenticatedBaseQuery(args, api, extraOptions);
-    }
-
-    return result;
-};
-
-const authenticatedDeviceBaseQueryWithReauth = async (args, api, extraOptions) => {
-    if (isAccessTokenExpired()) {
-        await refreshTokenIfNeeded();
-    }
-
-    let result = await authenticatedDeviceBaseQuery(args, api, extraOptions);
-
-    if (result?.error?.status === 401 && await refreshTokenIfNeeded()) {
-        return authenticatedDeviceBaseQuery(args, api, extraOptions);
-    }
-
-    return result;
-};
 
 const query = builder => url => builder.query({
     query: () => url,
 });
 
-export const anonymousApiSlice = createApi({
-    reducerPath: 'anonymousApi',
-    baseQuery: anonymousBaseQuery,
-    endpoints: builder => ({
-        getPresentUsers: query(builder)('users/present'),
-    }),
-});
-
-export const anonymousMqttApiSlice = createApi({
-    reducerPath: 'anonymousMqttApi',
-    baseQuery: anonymousMqttBaseQuery,
-    endpoints: builder => ({
-        getStatus: query(builder)('status'),
-    }),
-});
-
-export const authenticatedApiSlice = createApi({
-    reducerPath: 'authenticatedApi',
-    baseQuery: authenticatedBaseQueryWithReauth,
-    endpoints: builder => ({
-        getCurrentUser: query(builder)('current_user'),
-    }),
-});
-
-export const authenticatedDeviceApiSlice = createApi({
-    reducerPath: 'authenticatedDeviceApi',
-    baseQuery: authenticatedDeviceBaseQueryWithReauth,
+export const authenticatedPortierApiSlice = createApi({
+    reducerPath: 'authenticatedPortierApi',
+    baseQuery: authenticatedPortierBaseQuery,
     endpoints: builder => ({
         getDevices: query(builder)('devices'),
         deviceAction: builder.mutation({
@@ -122,16 +68,32 @@ export const authenticatedDeviceApiSlice = createApi({
     }),
 });
 
-export const {
-    useGetStatusQuery,
-} = anonymousMqttApiSlice;
+export const anonymousPresenceApiSlice = createApi({
+    reducerPath: 'anonymousApi',
+    baseQuery: anonymousPresenceBaseQuery,
+    endpoints: builder => ({
+        getPresentUsers: query(builder)('users/present'),
+    }),
+});
 
-export const {
-    useGetCurrentUserQuery,
-} = authenticatedApiSlice;
+export const anonymousMqttApiSlice = createApi({
+    reducerPath: 'anonymousMqttApi',
+    baseQuery: anonymousMqttProxyBaseQuery,
+    endpoints: builder => ({
+        getStatus: query(builder)('status'),
+    }),
+});
 
 export const {
     useGetDevicesQuery,
     useDeviceActionMutation,
     useGetActionLogQuery,
-} = authenticatedDeviceApiSlice;
+} = authenticatedPortierApiSlice;
+
+export const {
+    useGetPresentUsersQuery,
+} = anonymousPresenceApiSlice;
+
+export const {
+    useGetStatusQuery,
+} = anonymousMqttApiSlice;

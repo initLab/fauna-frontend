@@ -8,6 +8,7 @@ import LoadingIcon from '../widgets/icons/LoadingIcon.jsx';
 import ErrorMessage from '../widgets/ErrorMessage.jsx';
 import ActionLogEntry from '../widgets/ActionLog/ActionLogEntry.jsx';
 import { useNetworkState } from '@uidotdev/usehooks';
+import { withAuthenticationRequired } from 'react-oidc-context';
 
 const ActionLog = () => {
     const { t } = useTranslation();
@@ -32,7 +33,7 @@ const ActionLog = () => {
     });
 
     if (!hasAccess) {
-        return (<Navigate to="/doors" />);
+        return (<Navigate to="/" />);
     }
 
     return (<>
@@ -64,4 +65,4 @@ const ActionLog = () => {
     </>);
 };
 
-export default ActionLog;
+export default withAuthenticationRequired(ActionLog);

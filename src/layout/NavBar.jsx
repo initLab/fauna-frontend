@@ -3,34 +3,20 @@ import './NavBar.css';
 import initLabLogo from '../assets/initlab/logo.svg';
 import colibriLogo from '../assets/colibri/logo.png';
 import { useTranslation } from 'react-i18next';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import DoorClosedIcon from '../widgets/icons/DoorClosedIcon.jsx';
-import { useEffect } from 'react';
-import i18n from '../i18n.js';
 import { useVariant } from '../hooks/useVariant.js';
-import { useCurrentUser } from '../hooks/useCurrentUser.js';
 import RequireRole from '../widgets/RequireRole.jsx';
+import LoadingIcon from '../widgets/icons/LoadingIcon.jsx';
+import { useAuth } from 'react-oidc-context';
 
 const NavBar = () => {
     const {t} = useTranslation();
-    // TODO
+    const auth = useAuth();
     const oidcAuthorityUrl = import.meta.env.OIDC_AUTHORITY_URL;
-    const {
-        hasAccessToken,
-        user,
-        isSuccess,
-    } = useCurrentUser();
     const variant = useVariant();
     const isInitLab = variant === 'initlab';
     const isColibri = variant === 'colibri';
-
-    useEffect(function() {
-        if (isSuccess) {
-            i18n.changeLanguage(user.locale).then(() => {});
-        }
-    }, [user.locale, isSuccess]);
-
-    const location = useLocation();
 
     return (<Navbar {...({
         ...isInitLab && {
@@ -97,41 +83,36 @@ const NavBar = () => {
                         </Nav.Link>
                     </RequireRole>
                     <RequireRole roles={['board_member']}>
-                        <Nav.Link href={oidcAuthorityUrl}>
+                        <Nav.Link href={oidcAuthorityUrl + '/ui/console/users'} target="_blank">
                             <i className="fa-solid fa-users" />{' '}
                             {t('views.navigation.labbers')}
                         </Nav.Link>
                     </RequireRole>
-                    {hasAccessToken ? <NavDropdown title={<>
-                            <i className="fa-solid fa-user" />{' '}
-                            {t('views.navigation.account')}
-                        </>} className="ms-0 ms-lg-auto">
-                        <NavDropdown.Item href={oidcAuthorityUrl}>
+                    {auth.isLoading ? <Nav.Link className="ms-0 ms-lg-auto">
+                        <LoadingIcon />
+                    </Nav.Link> : (auth.isAuthenticated ? <NavDropdown title={<>
+                        <i className="fa-solid fa-user" />{' '}
+                        {t('views.navigation.account')}
+                    </>} className="ms-0 ms-lg-auto">
+                        <NavDropdown.Item href={oidcAuthorityUrl + '/ui/console/users/me'}>
                             {t('views.navigation.view_edit')}
                         </NavDropdown.Item>
                         {isInitLab && <>
                             <NavDropdown.Item href={oidcAuthorityUrl}>
                                 {t('views.navigation.network_devices')}
                             </NavDropdown.Item>
-                            <NavDropdown.Item href={oidcAuthorityUrl}>
-                                {t('views.navigation.oauth_application_management')}
-                            </NavDropdown.Item>
-                            <NavDropdown.Item href={oidcAuthorityUrl}>
+                            <NavDropdown.Item href={oidcAuthorityUrl + '/ui/console/users/me?id=grants'}>
                                 {t('views.navigation.oauth_token_management')}
                             </NavDropdown.Item>
                             <NavDropdown.Divider />
                         </>}
-                        <NavDropdown.Item as={NavLink} to="/logout" state={{
-                            from: location.pathname === '/doors' ? null : location,
-                        }}>
+                        <NavDropdown.Item onClick={() => void auth.removeUser()}>
                             {t('views.navigation.sign_out')}
                         </NavDropdown.Item>
-                    </NavDropdown> : <Nav.Link as={NavLink} to="/login" state={{
-                        from: location,
-                    }} className="ms-0 ms-lg-auto">
+                    </NavDropdown> : <Nav.Link onClick={() => void auth.signinRedirect()} className="ms-0 ms-lg-auto">
                         <i className="fa-solid fa-right-to-bracket" />{' '}
                         {t('views.navigation.sign_in')}
-                    </Nav.Link>}
+                    </Nav.Link>)}
                 </Nav>
             </Navbar.Collapse>
         </Container>

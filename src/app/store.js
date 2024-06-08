@@ -1,22 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import {
-    anonymousApiSlice,
-    anonymousMqttApiSlice,
-    authenticatedApiSlice,
-    authenticatedDeviceApiSlice
-} from '../features/apiSlice';
+import { anonymousMqttApiSlice, anonymousPresenceApiSlice, authenticatedPortierApiSlice } from '../features/apiSlice';
 
 export const store = configureStore({
     reducer: {
-        [anonymousApiSlice.reducerPath]: anonymousApiSlice.reducer,
+        [authenticatedPortierApiSlice.reducerPath]: authenticatedPortierApiSlice.reducer,
+        [anonymousPresenceApiSlice.reducerPath]: anonymousPresenceApiSlice.reducer,
         [anonymousMqttApiSlice.reducerPath]: anonymousMqttApiSlice.reducer,
-        [authenticatedApiSlice.reducerPath]: authenticatedApiSlice.reducer,
-        [authenticatedDeviceApiSlice.reducerPath]: authenticatedDeviceApiSlice.reducer,
     },
     middleware: getDefaultMiddleware =>
-        getDefaultMiddleware().concat(anonymousApiSlice.middleware).concat(anonymousMqttApiSlice.middleware)
-            .concat(authenticatedApiSlice.middleware).concat(authenticatedDeviceApiSlice.middleware),
+        getDefaultMiddleware().concat(authenticatedPortierApiSlice.middleware)
+            .concat(anonymousPresenceApiSlice.middleware).concat(anonymousMqttApiSlice.middleware),
 });
 
 setupListeners(store.dispatch);

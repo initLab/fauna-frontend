@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import ErrorMessage from '../widgets/ErrorMessage.jsx';
 import { useVariant } from '../hooks/useVariant.js';
 import PropTypes from 'prop-types';
-import { useNetworkState } from '@uidotdev/usehooks';
+// import { useNetworkState } from '@uidotdev/usehooks';
 
 const Devices = ({
     deviceType,
@@ -15,9 +15,9 @@ const Devices = ({
 }) => {
     const { t } = useTranslation();
 
-    const {
-        online,
-    } = useNetworkState();
+    // const {
+    //     online,
+    // } = useNetworkState();
 
     const {
         data: devices,
@@ -26,7 +26,7 @@ const Devices = ({
         isSuccess,
         isError,
     } = useGetDevicesQuery(undefined, {
-        pollingInterval: online === false ? 0 : 2_000,
+        // pollingInterval: online === false ? 0 : 2_000,
     });
 
     const filteredDevices = useMemo(() =>

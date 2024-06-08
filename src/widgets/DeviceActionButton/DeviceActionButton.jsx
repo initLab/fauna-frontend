@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import './DeviceActionButton.scss';
 import { useDeviceActionMutation } from '../../features/apiSlice.js';
-import RedirectToLogin from '../RedirectToLogin.jsx';
 import { sleep } from '../../utils/time.js';
 
 const types = {
@@ -39,10 +38,7 @@ const DeviceActionButton = ({
 }) => {
     const [ disabled, setDisabled ] = useState(false);
 
-    const [ execute, {
-        isError,
-        error,
-    } ] = useDeviceActionMutation();
+    const [ execute ] = useDeviceActionMutation();
 
     const {t} = useTranslation();
     const type = types?.[action] || {
@@ -71,7 +67,6 @@ const DeviceActionButton = ({
             <i className={icon} />
             <div>{label}</div>
         </Button>
-        {isError && [401, 403].includes(error.status) && <RedirectToLogin />}
     </>);
 };
 
