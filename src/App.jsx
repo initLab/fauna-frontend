@@ -9,7 +9,7 @@ import ActionLog from './pages/ActionLog.jsx';
 import Lights from './pages/Lights.jsx';
 import { useVariant } from './hooks/useVariant.js';
 import { useEffect } from 'react';
-import { useAuth } from 'react-oidc-context';
+import { useGetUserInfoQuery } from './features/apiSlice.js';
 import i18n from './i18n.js';
 
 function App() {
@@ -21,15 +21,17 @@ function App() {
         }
     }, [variant]);
 
-    const auth = useAuth();
-    // TODO
-    console.log(auth);
+    const {
+        data: user,
+    } = useGetUserInfoQuery();
+
     useEffect(function() {
-        if (auth.isAuthenticated) {
-            // TODO
-            i18n.changeLanguage(auth.user.profile?.preferredLanguage || 'bg').then(() => {});
+        if (user?.locale) {
+            (async () => {
+                await i18n.changeLanguage(user.locale);
+            })();
         }
-    }, [auth]);
+    }, [user?.locale]);
 
     return (<>
         <NavBar />
