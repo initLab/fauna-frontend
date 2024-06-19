@@ -4,7 +4,7 @@ export const oidc = {
     authority: import.meta.env.OIDC_AUTHORITY_URL,
     client_id: import.meta.env.OIDC_CLIENT_ID,
     redirect_uri: window.location.protocol + '//' + window.location.host + import.meta.env.BASE_URL,
-    scope: 'openid profile offline_access',
+    scope: 'openid profile offline_access urn:zitadel:iam:org:project:id:zitadel:aud urn:zitadel:iam:org:projects:roles',
     onSigninCallback: () => {
         window.history.replaceState({}, document.title, window.location.pathname);
     },

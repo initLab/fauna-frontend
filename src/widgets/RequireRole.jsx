@@ -1,16 +1,11 @@
-import { useAuth } from 'react-oidc-context';
+import { useCurrentUser } from '../hooks/useCurrentUser.js';
 
 const RequireRole = ({
     children,
     roles,
 }) => {
-    const auth = useAuth();
-
-    if (!auth.isAuthenticated) {
-        return null;
-    }
-
-    const userRoles = Object.keys(auth.user.profile?.['urn:zitadel:iam:org:project:roles'] ?? {});
+    const user = useCurrentUser();
+    const userRoles = Object.keys(user?.['urn:zitadel:iam:org:project:roles'] ?? {});
 
     const searchRoles = typeof roles === 'string' ? [roles] : Array.from(roles);
     const isAllowed = userRoles.some(userRole => searchRoles.includes(userRole));

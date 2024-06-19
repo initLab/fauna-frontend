@@ -14,32 +14,30 @@ function getAccessToken() {
     return user?.access_token;
 }
 
+function prepareHeaders(headers) {
+    headers.set('accept', 'application/json');
+
+    const token = getAccessToken();
+
+    if (token) {
+        headers.set('authorization', 'Bearer ' + token);
+    }
+
+    return headers;
+}
+
 const portierBaseUrl = import.meta.env.PORTIER_URL + 'api/';
-const presenceBaseUrl = import.meta.env.OIDC_AUTHORITY_URL + 'api/';
+const oidcAuthorityBaseUrl = import.meta.env.OIDC_AUTHORITY_URL;
 const mqttProxyBaseUrl = import.meta.env.MQTT_PROXY_URL;
 
 const authenticatedPortierBaseQuery = fetchBaseQuery({
     baseUrl: portierBaseUrl,
-    prepareHeaders: headers => {
-        headers.set('accept', 'application/json');
-
-        const token = getAccessToken();
-
-        if (token) {
-            headers.set('authorization', 'Bearer ' + token);
-        }
-
-        return headers;
-    },
+    prepareHeaders,
 });
 
-const anonymousPresenceBaseQuery = fetchBaseQuery({
-    baseUrl: presenceBaseUrl,
-    prepareHeaders: headers => {
-        headers.set('accept', 'application/json');
-
-        return headers;
-    },
+const authenticatedOidcAuthorityBaseQuery = fetchBaseQuery({
+    baseUrl: oidcAuthorityBaseUrl,
+    prepareHeaders,
 });
 
 const anonymousMqttProxyBaseQuery = fetchBaseQuery({
@@ -68,11 +66,11 @@ export const authenticatedPortierApiSlice = createApi({
     }),
 });
 
-export const anonymousPresenceApiSlice = createApi({
-    reducerPath: 'anonymousApi',
-    baseQuery: anonymousPresenceBaseQuery,
+export const authenticatedOidcAuthorityApiSlice = createApi({
+    reducerPath: 'authenticatedOidcAuthorityApi',
+    baseQuery: authenticatedOidcAuthorityBaseQuery,
     endpoints: builder => ({
-        getPresentUsers: query(builder)('users/present'),
+        getUserInfo: query(builder)('oidc/v1/userinfo'),
     }),
 });
 
@@ -91,8 +89,8 @@ export const {
 } = authenticatedPortierApiSlice;
 
 export const {
-    useGetPresentUsersQuery,
-} = anonymousPresenceApiSlice;
+    useGetUserInfoQuery,
+} = authenticatedOidcAuthorityApiSlice;
 
 export const {
     useGetStatusQuery,
